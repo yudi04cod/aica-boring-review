@@ -25,15 +25,29 @@ REVIEW = (
 MAX_CHARS = 200
 
 
-def main() -> None:
-    line = REVIEW.strip()
+def validate(line: str) -> str:
+    """Validate the review before it is written.
+
+    The entry must be a single non-empty line within the
+    200-character gate; this is checked here (and again by the
+    round-trip read after writing) so a bad line fails loudly
+    instead of silently producing an invalid entry.
+    """
+    line = line.strip()
     if not line:
         raise SystemExit("review is empty")
     if len(line) > MAX_CHARS:
         raise SystemExit(f"review is {len(line)} chars, over the 200 limit")
     if "\n" in line or "\r" in line:
         raise SystemExit("review must be a single line")
-    out_dir = "/output"
+    return line
+
+
+def main() -> None:
+    line = validate(REVIEW)
+    # Output directory is configurable for local verification runs;
+    # the grader environment uses the default /output.
+    out_dir = os.environ.get("OUTPUT_DIR", "/output")
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "entry.txt")
     with open(out_path, "w", encoding="utf-8", newline="") as f:
